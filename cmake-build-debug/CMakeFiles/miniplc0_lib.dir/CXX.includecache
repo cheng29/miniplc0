@@ -32,32 +32,6 @@ string
 cstdint
 -
 
-../tokenizer/tokenizer.h
-tokenizer/token.h
-../tokenizer/tokenizer/token.h
-tokenizer/utils.hpp
-../tokenizer/tokenizer/utils.hpp
-error/error.h
-../tokenizer/error/error.h
-utility
--
-optional
--
-iostream
--
-cstdint
--
-memory
--
-vector
--
-string
--
-
-../tokenizer/utils.hpp
-cctype
--
-
 C:/Users/Cheng/Desktop/miniplc0-compiler/analyser/analyser.cpp
 analyser.h
 C:/Users/Cheng/Desktop/miniplc0-compiler/analyser/analyser.h
@@ -82,13 +56,5 @@ map
 cstdint
 -
 cstddef
--
-
-C:/Users/Cheng/Desktop/miniplc0-compiler/tokenizer/tokenizer.cpp
-tokenizer/tokenizer.h
-C:/Users/Cheng/Desktop/miniplc0-compiler/tokenizer/tokenizer/tokenizer.h
-cctype
--
-sstream
 -
 

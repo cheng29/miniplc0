@@ -135,7 +135,7 @@ namespace miniplc0 {
 			case UNSIGNED_INTEGER_STATE: {
 				// 请填空：
                 if (!current_char.has_value()) { // 如果当前已经读到了文件尾，则解析已经读到的字符串为整数
-                    int val;
+                    std::string val;
                     ss >> val;
                     Token x = Token(TokenType::UNSIGNED_INTEGER, val, pos.first, pos.second, _ptr.second, _ptr.second);
                     return std::make_pair(std::optional<Token>(x), std::optional<CompilationError>(
@@ -149,7 +149,7 @@ namespace miniplc0 {
                     ss << ch;
                 } else {
                     unreadLast();
-                    int val;
+                    std::string val;
                     ss >> val;
                     Token x = Token(TokenType::UNSIGNED_INTEGER, val, pos.first, pos.second, _ptr.second, _ptr.second);
                     return std::make_pair(std::optional<Token>(x), std::optional<CompilationError>(checkToken(x)));
@@ -163,7 +163,7 @@ namespace miniplc0 {
                 if (!current_char.has_value()) {
                     std::string val;// 如果当前已经读到了文件尾，则解析已经读到的字符串
                     ss >> val;//              如果解析结果是关键字，那么返回对应关键字的token，否则返回标识符的token
-                    Token x = Token(check_keyword(val).value(), val, pos.first, pos.second, _ptr.second, _ptr.second);
+                    Token x = Token(check_keyword(val).value(), val, pos, _ptr);
                     return std::make_pair(std::optional<Token>(x), std::optional<CompilationError>(checkToken(x)));
                 }
                     // 如果读到的是字符或字母，则存储读到的字符
@@ -222,6 +222,12 @@ namespace miniplc0 {
                     return std::make_pair(std::make_optional<Token>(TokenType::SEMICOLON, ';', pos, currentPos()),
                                           std::optional<CompilationError>());
                 }
+                case EQUAL_SIGN_STATE:{
+                    unreadLast();
+                    return std::make_pair(std::make_optional<Token>(TokenType::EQUAL_SIGN, '=', pos, currentPos()),
+                                          std::optional<CompilationError>());
+                }
+
 			default:
 				DieAndPrint("unhandled state.");
 				break;
@@ -297,15 +303,15 @@ namespace miniplc0 {
 
 
     std::optional<TokenType> Tokenizer::check_keyword(std::string val) {
-        if (val.compare("BEGIN"))
+        if (val.compare("begin")==0)
             return TokenType::BEGIN;
-        else if (val.compare("END"))
+        else if (val.compare("end")==0)
             return TokenType::END;
-        else if (val.compare("VAR"))
+        else if (val.compare("var")==0)
             return TokenType::VAR;
-        else if (val.compare("CONST"))
+        else if (val.compare("const")==0)
             return TokenType::CONST;
-        else if (val.compare("PRINT"))
+        else if (val.compare("print")==0)
             return TokenType::PRINT;
         else
             return TokenType::IDENTIFIER;
