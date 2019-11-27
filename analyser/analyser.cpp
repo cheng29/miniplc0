@@ -71,15 +71,15 @@ namespace miniplc0 {
 			// <常量声明语句>
 			next = nextToken();
 			if (!next.has_value() || next.value().GetType() != TokenType::IDENTIFIER)
-				return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNeedIdentifier);
+				return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrNeedIdentifier);
 			if (isDeclared(next.value().GetValueString()))
-				return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrDuplicateDeclaration);
+				return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrDuplicateDeclaration);
 			addConstant(next.value());
 
 			// '='
 			next = nextToken();
 			if (!next.has_value() || next.value().GetType() != TokenType::EQUAL_SIGN)
-				return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrConstantNeedValue);
+				return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrConstantNeedValue);
 
 			// <常表达式>
 			int32_t val;
@@ -90,7 +90,7 @@ namespace miniplc0 {
 			// ';'
 			next = nextToken();
 			if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
-				return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNoSemicolon);
+				return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrNoSemicolon);
 			// 生成一次 LIT 指令加载常量
 			_instructions.emplace_back(Operation::LIT, val);
 		}
@@ -113,14 +113,12 @@ namespace miniplc0 {
             }
             next = nextToken();// <标识符>
             if (!next.has_value() || next.value().GetType() != TokenType::IDENTIFIER)
-                return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNeedIdentifier);
+                return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrNeedIdentifier);
             if (isDeclared(next.value().GetValueString()))
-                return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrDuplicateDeclaration);
+                return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrDuplicateDeclaration);
             auto id=next;
-            addUninitializedVariable(next.value());
 
             next = nextToken();// 变量可能没有初始化，仍然需要一次预读
-
             if (next.value().GetType() == TokenType::EQUAL_SIGN) {// '='
                 auto err = analyseExpression();                                  // '<表达式>'
                 if (err.has_value())
@@ -131,7 +129,7 @@ namespace miniplc0 {
                 unreadToken();
             }
 
-            next = nextToken();
+            next = nextToken();// ';'
             if (!next.has_value() || next.value().GetType() != TokenType::SEMICOLON)
                 return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrNoSemicolon);
             if(initialed_flag)
@@ -139,7 +137,7 @@ namespace miniplc0 {
             else
                 addUninitializedVariable(id.value());
         }
-		// ';'
+
 		return {};
 	}
 
@@ -204,10 +202,10 @@ namespace miniplc0 {
             next = nextToken();
         }
         if (!next.has_value() || next.value().GetType() != UNSIGNED_INTEGER)
-            return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrNotInitialized);
+            return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrNotInitialized);
 
         if ((atoi(std::any_cast<std::string>(next.value().GetValue()).c_str()))* (positive_flag == true ? 1 : -1) == (1 << 31))
-            return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrIntegerOverflow);
+            return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrIntegerOverflow);
 
         out = (atoi(std::any_cast<std::string>(next.value().GetValue()).c_str()))* (positive_flag == true ? 1 : -1);
 		// 注意以下均为常表达式
@@ -292,7 +290,7 @@ namespace miniplc0 {
 		// '('
 		next = nextToken();
 		if (!next.has_value() || next.value().GetType() != TokenType::LEFT_BRACKET)
-			return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrInvalidPrint);
+			return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrInvalidPrint);
 
 		// <表达式>
 		auto err = analyseExpression();
@@ -356,7 +354,7 @@ namespace miniplc0 {
 		auto next = nextToken();
 		auto prefix = 1;
 		if (!next.has_value())
-			return std::make_optional<CompilationError>(_current_pos, ErrorCode::ErrIncompleteExpression);
+			return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrIncompleteExpression);
 		if (next.value().GetType() == TokenType::PLUS_SIGN)
 			prefix = 1;
 		else if (next.value().GetType() == TokenType::MINUS_SIGN) {
@@ -391,7 +389,7 @@ namespace miniplc0 {
                 err = analyseExpression();
                 if (err.has_value())
                     return err;
-
+                next=nextToken();
                 if (!next.has_value() || next.value().GetType() != RIGHT_BRACKET)
                     return std::make_optional<CompilationError>(next.value().GetStartPos(), ErrorCode::ErrIncompleteExpression);
 
