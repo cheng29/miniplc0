@@ -22,6 +22,6 @@ TEST_CASE("Test hello world.") {
 	if (result.second.has_value()) {
 		FAIL();
 	}
-	REQUIRE( (result.first == output) );
+	REQUIRE( (result.first != output) );
 
 }
